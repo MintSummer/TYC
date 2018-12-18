@@ -1,0 +1,115 @@
+///主席树维护的是:每一个版本,每一个点的父亲是谁
+#include<cstdio>
+#include<cstdlib>
+#include<cstring>
+#include<iostream>
+#include<algorithm>
+using namespace std;
+const int M=2e5+10;
+
+namespace Tree
+{
+    int cnt,fa[M*30],ls[M*30],rs[M*30],dep[M*30];
+    //fa[i]记的是标号为i的点的父亲,dep[i]存以i为根的树的最大深度
+    //用启发式合并来保证复杂度O(nlog(n))
+
+    void build(int &root,int l,int r)
+    {
+		root=++cnt;
+		if(l==r) {fa[root]=l;return;}
+		int mid=(l+r)>>1;
+		build(ls[root],l,mid);
+		build(rs[root],mid+1,r);
+    }
+
+    int query(int root,int l,int r,int x)
+    {
+		if(l==r) return root;
+		int mid=(l+r)>>1;
+		if(x<=mid) return query(ls[root],l,mid,x);
+		else return query(rs[root],mid+1,r,x);
+    }
+
+    void merge(int &root,int last,int l,int r,int x,int f)
+    {
+		root=++cnt;
+		if(l==r)
+		{
+			fa[root]=f;
+			dep[root]=dep[last];
+			return;
+		}
+		ls[root]=ls[last],rs[root]=rs[last];
+		int mid=(l+r)>>1;
+		if(x<=mid) merge(ls[root],ls[last],l,mid,x,f);
+		else merge(rs[root],rs[last],mid+1,r,x,f);
+    }
+
+    void add(int root,int l,int r,int x)//把某一个并查集联通块中每一个点的深度加一
+    {
+		if(l==r) {dep[root]++;return;}
+		int mid=(l+r)>>1;
+		if(x<=mid) add(ls[root],l,mid,x);
+		else add(rs[root],mid+1,r,x);
+    }
+}
+
+namespace TYC
+{
+    using namespace Tree;
+    int n,m,Ed[M];//Edition版本,记录版本号
+
+    inline int read()
+    {
+		int x=0,f=0;char ch=getchar();
+		while(!isdigit(ch)) f|=(ch=='-'),ch=getchar();
+		while(isdigit(ch)) x=x*10+ch-'0',ch=getchar();
+		return f?-x:x;
+    }
+
+    int find(int e,int x)//返回的是版本e中x祖宗的标号
+    {
+		int f=query(e,1,n,x);// 查询在版本e里x的标号,fa[f]才是x的父亲
+		return x==fa[f]?f:find(e,fa[f]);//不能路径压缩
+    }
+
+    void work()
+    {
+		n=read(),m=read();
+		build(Ed[0],1,n);
+		int opt,x,y,fx,fy;
+		for(int i=1;i<=m;i++)
+		{
+			opt=read();
+			switch(opt)
+			{
+				case 1:
+					Ed[i]=Ed[i-1];
+					x=read(),y=read();
+					fx=find(Ed[i],x),fy=find(Ed[i],y);
+					if(fa[fx]==fa[fy]) continue;//已经属于一个集合
+					if(dep[fx]>dep[fy]) swap(fx,fy);
+					merge(Ed[i],Ed[i-1],1,n,fa[fx],fa[fy]);//将fx集合合并到fy中,启发式合并,存成新版本
+					if(dep[fx]==dep[fy]) add(Ed[i],1,n,fa[fy]);//将fx合并到了fy中,深度要++
+					break;
+				case 2:
+					x=read();
+					Ed[i]=Ed[x];
+					break;
+				case 3:
+					Ed[i]=Ed[i-1];
+					x=read(),y=read();
+					fx=find(Ed[i],x),fy=find(Ed[i],y);
+					if(fa[fx]==fa[fy]) puts("1");
+					else puts("0");
+					break;
+			}
+		}
+    }
+}
+
+int main()
+{
+    TYC::work();
+    return 0;
+}

@@ -1,0 +1,13 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+namespace TYC
+{
+
+}
+
+int main()
+{
+    TYC::work();
+    return 0;
+}

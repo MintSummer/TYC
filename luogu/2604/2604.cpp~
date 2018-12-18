@@ -1,0 +1,138 @@
+#include<cstdio>
+#include<cstring>
+#include<queue>
+#include<algorithm>
+using namespace std;
+
+int n,m,k,t,cnt,head[1010],dis[1010],cur[1010],w[20010],pre[1010];
+bool vis[1010];
+const int INF=0x3f3f3f3f;
+struct edge
+{
+	int from,to,w,c,next;
+}e[20010];
+
+inline void add(int a,int b,int c,int d)
+{
+	e[cnt]=(edge){a,b,c,d,head[a]};
+	head[a]=cnt++;
+}
+
+bool bfs()
+{
+	queue<int>q;
+	memset(dis,-1,sizeof(dis));
+	dis[1]=0;
+	q.push(1);
+	while(!q.empty())
+	{
+		int u=q.front();
+		q.pop();
+		for(int i=head[u];~i;i=e[i].next)
+		{
+			int v=e[i].to;
+			if(e[i].w>0&&dis[v]==-1) dis[v]=dis[u]+1,q.push(v);
+		}
+	}	
+	return dis[n]!=-1;
+}
+	
+int dfs(int u,int minn)
+{
+	if(u==n||minn==0)return minn;
+	int used=0;
+	for(int &i=cur[u];~i;i=e[i].next)
+	{
+		int v=e[i].to;
+		if(dis[v]==dis[u]+1&&e[i].w>0)
+		{
+			int w=dfs(v,min(minn-used,e[i].w));
+			used+=w,e[i].w-=w,e[i^1].w+=w;
+		}
+		if(used==minn)break;
+	}
+	return used;
+}
+
+int dinic()
+{
+	int ans=0;
+	while(bfs())
+	{
+		memcpy(cur,head,sizeof(cur));
+		ans+=dfs(1,INF);
+	}
+	return ans;
+}
+	
+bool SPFA()
+{
+	queue<int>q;
+	memset(pre,-1,sizeof(pre));
+	memset(dis,INF,sizeof(dis));
+	dis[1]=0;
+	vis[1]=true;
+	q.push(1);
+	while(!q.empty())
+	{
+		int u=q.front();
+		vis[u]=false;
+		q.pop();
+		for(int i=head[u];~i;i=e[i].next)
+		{
+			int v=e[i].to;
+			if(e[i].w>0&&dis[v]>dis[u]+e[i].c)
+			{	
+				dis[v]=dis[u]+e[i].c;
+				pre[v]=i;
+				if(!vis[v])
+					vis[v]=true,q.push(v);
+			}
+		}
+	}
+	return dis[t]!=INF;
+}
+	
+int EK()
+{
+	int ans=0;
+	while(SPFA())
+	{
+		int i=pre[t],minn=INF;
+		while(~i)
+			minn=min(minn,e[i].w),i=pre[e[i].from];
+		i=pre[t];
+		while(~i)
+		{
+			e[i].w-=minn,e[i^1].w+=minn;
+			i=pre[e[i].from];
+		}
+		ans+=minn*dis[t];
+	}
+	return ans;
+}
+
+int main(void)
+{
+	memset(head,-1,sizeof(head));
+	scanf("%d%d%d",&n,&m,&k);
+	t=n+1;
+	for(int i=0;i<m;i++)
+	{
+		int a,b,c;
+		scanf("%d%d%d%d",&a,&b,&c,&w[i]);
+		add(a,b,c,0);
+		add(b,a,0,0);
+	}
+	printf("%d ",dinic());
+	int tmp=cnt;
+	for(int i=0;i<tmp;i+=2)
+	{
+		add(e[i].from,e[i].to,INF,w[i/2]);
+		add(e[i].to,e[i].from,0,-w[i/2]);
+	}
+	add(n,t,k,0);		
+	add(t,n,0,0);
+	printf("%d",EK());
+	return 0;
+}

@@ -1,0 +1,70 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+namespace TYC
+{
+    typedef long long ll;
+    const ll p=1000000007;
+    ll A,B,C,D;
+    char N[1000010],M[1000010];
+
+    struct Matrix
+    {
+		ll v[3][3];
+    }m1,m2;
+
+    inline Matrix operator * (const Matrix &a,const Matrix &b)
+    {
+		Matrix ans;
+		ans.v[1][1]=(a.v[1][1]*b.v[1][1]%p+a.v[1][2]*b.v[2][1]%p)%p;
+		ans.v[1][2]=(a.v[1][1]*b.v[1][2]%p+a.v[1][2]*b.v[2][2]%p)%p;
+		ans.v[2][1]=(a.v[2][1]*b.v[1][1]%p+a.v[2][2]*b.v[2][1]%p)%p;
+		ans.v[2][2]=(a.v[2][1]*b.v[1][2]%p+a.v[2][2]*b.v[2][2]%p)%p;
+		return ans;
+    }
+
+    inline void sub(char *ch)
+    {
+		int len=strlen(ch);
+		for(int i=len-1;i>=0;i--)
+			if(ch[i]=='0') ch[i]='9';
+			else {ch[i]=ch[i]-1;return;}
+    }
+
+    inline Matrix qpow(Matrix a,char *tim)
+    {
+		Matrix ans;
+		ans.v[1][1]=ans.v[2][2]=1,ans.v[1][2]=ans.v[2][1]=0;
+		int len=strlen(tim);
+		for(int i=len-1;i>=0;i--)
+		{
+			int x=tim[i]-'0';
+			Matrix tmp=a;
+			if(x>=8) tmp=tmp*tmp,tmp=tmp*tmp,tmp=tmp*tmp,ans=ans*tmp,x-=8;
+			else if(x>=4) tmp=tmp*tmp,tmp=tmp*tmp,ans=ans*tmp,x-=4;
+			while(x--) ans=ans*a;
+			tmp=a;
+			a=a*a,a=a*a,a=a*a,a=a*tmp,a=a*tmp;
+		}
+		return ans;
+    }
+
+    void work()
+    {
+		scanf("%s%s",N,M);
+		scanf("%lld%lld%lld%lld",&A,&B,&C,&D);
+		sub(N),sub(M);
+		m1.v[1][1]=A,m1.v[1][2]=B,m1.v[2][2]=1;
+		m2.v[1][1]=C,m2.v[1][2]=D,m2.v[2][2]=1;
+		m1=qpow(m1,M);
+		m2=m2*m1;
+		Matrix ans=m1*qpow(m2,N);
+		printf("%lld",(ans.v[1][1]+ans.v[1][2])%p);
+    }
+}
+
+int main()
+{
+    TYC::work();
+    return 0;
+}

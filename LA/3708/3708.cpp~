@@ -1,0 +1,24 @@
+#include<bits/stdc++.h>
+using namespace std;
+const double eps=1e-8;
+int n,m;
+double len=10000.0;
+
+int main()
+{
+    while(~scanf("%d%d",&n,&m))
+    {
+	int tot=n+m;
+	double dis=len/tot;
+	double be=len/n;
+	int tim=0;
+	while(be-tim*dis>eps) tim++;
+	double mn=min(be-(tim-1)*dis,tim*dis-be);
+	double ans=(n-1)*mn;
+	int x=(int)ans;
+	if(ans-x<=eps) printf("%d.0",x);
+	else printf("%.4lf",ans);
+	printf("\n");
+    }
+    return 0;
+}

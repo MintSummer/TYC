@@ -1,0 +1,91 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+namespace TYC
+{
+    const int MAXN=60,inf=0x3f3f3f3f;
+    int n,m,root=0,cnt,tim[MAXN],pre[MAXN],vis[MAXN],belong[MAXN];
+    double ans,money[MAXN],in[MAXN];
+
+    struct edge
+    {
+		int u,v;
+		double w;
+    }e[20010];
+
+    void solve()
+    {
+		while(1)
+		{
+			for(int i=1;i<=n;i++) 
+				if(tim[i]) in[i]=inf;
+			for(int i=1;i<=m;i++)
+			{
+				int u=e[i].u,v=e[i].v;
+				if(!tim[u]||!tim[v]) continue;
+				if(u!=v&&e[i].w<in[v]) in[v]=e[i].w,pre[v]=u;
+			}
+			int tot=0;
+			in[root]=0;
+			memset(vis,0,sizeof(vis));
+			memset(belong,-1,sizeof(belong));
+			for(int i=1;i<=n;i++)
+			{
+			    if(!tim[i]||in[i]==inf) continue;
+				ans+=in[i];
+				int v=i;
+				while(v!=root&&belong[v]==-1&&vis[v]!=i&&tim[v])
+					vis[v]=i,v=pre[v];
+				if(v!=root&&belong[v]==-1&&tim[v])
+				{
+					belong[v]=++tot;
+					for(int u=pre[v];u!=v&&tim[u];u=pre[u]) belong[u]=tot;
+				}
+			}
+			if(!tot) return;
+			for(int i=1;i<=n;i++)
+				if(belong[i]==-1&&tim[i]) belong[i]=++tot;
+			for(int i=1;i<=m;i++)
+			{
+				int u=e[i].u,v=e[i].v;
+				if(!tim[u]||!tim[v]) continue;
+				e[i].u=belong[u],e[i].v=belong[v];
+				if(belong[u]!=belong[v]) e[i].w-=in[v];
+			}
+			n=tot,root=belong[root];
+		}
+    }
+
+    void work()
+    {
+		scanf("%d",&n);
+		double w;
+		for(int i=1;i<=n;i++)
+		{   
+			scanf("%lf%d",&money[i],&tim[i]);
+			if(tim[i]) e[++cnt]=(edge){n+1,i,money[i]};
+		}
+		n++;
+		tim[n]=0x3f3f3f3f;
+		scanf("%d",&m);
+		int u,v;
+		for(int i=1;i<=m;i++)
+		{
+			scanf("%d%d%lf",&u,&v,&w);
+			if(!tim[u]||!tim[v]) continue;
+			e[++cnt]=(edge){u,v,w};
+			money[v]=min(money[v],w);
+		}
+		for(int i=1;i<=n;i++)
+			if(tim[i]) ans+=(tim[i]-1)*money[i];
+		m+=n;
+		solve();
+		printf("%.2lf\n",ans);
+    }
+}
+
+int main()
+{
+    TYC::work();
+    return 0;
+}

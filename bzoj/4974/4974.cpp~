@@ -1,0 +1,54 @@
+#include<cstdio>
+#include<cstdlib>
+#include<cstring>
+#include<string>
+#include<iostream>
+#include<algorithm>
+using namespace std;
+
+namespace TYC
+{
+    const int MAXN=100010;
+    int n,nxt[MAXN],vis[MAXN][26];
+    char s[MAXN];
+
+    inline int read()
+    {
+		int x=0;char ch=getchar();
+		while(!isdigit(ch)) ch=getchar();
+		while(isdigit(ch)) x=x*10+ch-'0',ch=getchar();
+		return x;
+    }
+
+    void work()
+    {
+		n=read();
+		nxt[0]=0;
+		for(int i=1;i<=n;i++)
+			nxt[i]=i-read();
+		int i=0,fail=-1;
+		nxt[0]=-1;
+		while(i<n)
+		{
+		    if(nxt[i+1]==fail+1)
+		    {
+			if(fail!=-1) s[i]=s[fail];
+			else for(char c='a';c<='z';c++)
+			    if(!vis[i][c-'a']) {s[i]=c;break;}
+			i++,fail++;
+		    }
+		    else
+		    {
+			vis[i][s[fail]-'a']=1;
+			fail=nxt[fail];
+		    }
+		}
+		printf("%s",s);
+    }
+}
+
+int main()
+{
+    TYC::work();
+    return 0;
+}

@@ -1,0 +1,71 @@
+
+
+#include<bits/stdc++.h>
+using namespace std;
+const int MAXN=100010;
+int n,m,cnt,q[MAXN];
+char a[25][15],b[MAXN];
+
+struct AC
+{
+    int son[MAXN][26],fail[MAXN],end[MAXN],start[MAXN];
+    int now,tmp,len,x;
+    
+    void insert(char ch[])
+    {
+        len=strlen(ch),now=0;
+        for(int i=0;i<len;i++)
+        {
+            tmp=ch[i]-'a';
+            if(!son[now][tmp]) son[now][tmp]=++cnt;
+            now=son[now][tmp];
+        }
+        end[now]=len;
+    }
+    
+    void get_fail()
+    {
+        int h=0,t=0;
+        for(int i=0;i<26;i++)
+            if(son[0][i]) q[++t]=son[now][i];
+        while(h<t)
+        {
+            now=q[++h];
+            for(int i=0;i<26;i++)
+                if(son[now][i])
+                {
+                    x=son[now][i];
+                    fail[x]=son[fail[now]][i];
+                    start[x]=end[fail[x]]?fail[x]:start[fail[x]];
+                    q[++t]=son[now][i];
+                }
+                else son[now][i]=son[fail[now]][i];
+        }
+    }
+    
+    int search(char ch[])
+    {
+        int ans=0;
+        len=strlen(ch),now=0;
+        for(int i=0;i<len;i++)
+        {
+            now=son[now][ch[i]-'a'];
+            if(!now) break;
+            if(start[now]) ans+=end[start[now]],now=0;
+        }
+        return ans;
+    }
+}ac;
+
+int main()
+{
+    scanf("%d%d",&n,&m);
+    for(int i=1;i<=n;i++) 
+        scanf("%s",a[i]),ac.insert(a[i]);
+    ac.get_fail();
+    for(int i=1;i<=m;i++) 
+        scanf("%s",b),printf("%d\n",ac.search(b));
+    return 0;
+} 
+
+

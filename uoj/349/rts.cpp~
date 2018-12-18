@@ -1,0 +1,42 @@
+#include "rts.h"
+#include <string.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include<iostream>
+#include<algorithm>
+using namespace std;
+int vis[300010];
+
+void play(int n, int T, int dataType)
+{
+	int now=1;
+	if(dataType==3)
+	{
+		int mx[2];
+		mx[0]=1,mx[1]=1;
+		int k=0;//k所指的为从1到2的那个方向，
+		for(int i=2;i<=n;i++)
+		{
+			if(vis[i]) continue;
+			while(!vis[i])
+			{
+				now=explore(now,i);
+				if(vis[now]) now=mx[k^=1];
+				else vis[now]=1,mx[k]=now;
+			}
+		}
+	}
+	else 
+	{
+		for(int i=2;i<=n;i++)
+		{
+			if(vis[i]) continue;
+			while(now!=i)
+			{
+				now=explore(now,i);
+				vis[now]=1;
+			}
+		}
+	}
+}

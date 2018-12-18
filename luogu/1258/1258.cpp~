@@ -1,0 +1,14 @@
+#include<bits/stdc++.h>
+using namespace std;
+int s,a,b;
+
+int main()
+{
+	scanf("%d%d%d",&s,&a,&b);
+	double lt=0.0,rt=s/a*1.0,mid;
+	while(lt<=rt)
+	{
+		mid=(lt+rt)>>1;
+		if(check())
+	}
+}

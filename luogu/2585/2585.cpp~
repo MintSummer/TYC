@@ -1,0 +1,40 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+namespace TYC
+{
+	const int N=500010;
+	int n,son[N][2],mx[N][2];
+	char ch[N];
+	#define ls son[u][0]
+	#define rs son[u][1]	
+
+	void dfs(int u)
+	{
+		if(ls) dfs(ls);
+		if(rs) dfs(rs);
+		mx[u][1]=mx[ls][0]+mx[rs][0]+1;
+		mx[u][0]=max(mx[ls][1]+mx[rs][0],mx[ls][0]+mx[rs][1]);
+	}
+
+	void work()
+	{
+		scanf("%s",ch+1);
+		int len=strlen(ch+1);
+		n=1;
+		for(int i=1;i<=len;i++)
+		{
+			if(ch[i]=='0') continue;
+			else son[i][0]=++n;
+			if(ch[i]=='2') son[i][1]=++n;
+		}
+		dfs(1);
+		printf("%d ",max(mx[1][0],mx[1][1]));
+	}
+}
+
+int main()
+{
+	TYC::work();
+	return 0;
+}

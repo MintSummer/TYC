@@ -1,0 +1,31 @@
+//from:TYC的单调队列
+#include<bits/stdc++.h>
+using namespace std;
+long long a[200010],mx[200010];
+const long long inf=1e10;
+
+int main()
+{
+	memset(mx,-inf,sizeof(mx));
+	long long n=0,m,p,ans=0;
+	scanf("%lld%lld",&m,&p);
+	char ch[5];
+	long long x;
+	while(m--)
+	{
+		scanf("%s%lld",ch,&x);
+		if(ch[0]=='A')
+		{
+			a[++n]=(ans+x)%p;
+			for(int i=n;i>=1;i--)
+				if(mx[i]<a[n]) mx[i]=a[n];
+				else break;
+		}
+		else 
+		{
+			ans=mx[n-x+1];
+			if(ans==-inf) ans=0;
+			printf("%lld\n",ans);
+		}
+	}
+}

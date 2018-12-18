@@ -1,0 +1,109 @@
+#include<cstdio>
+#include<cstring>
+#include<map>
+using namespace std;
+typedef long long ll;
+const int MAXN=10*10+10;
+const int P=100000;
+ll N;
+int M,cnt,q[MAXN*4];
+map<char,int> id;
+
+struct Matrix
+{
+    ll x[MAXN][MAXN];
+    Matrix()
+    {
+	for(int i=0;i<=cnt;i++)
+	    for(int j=0;j<=cnt;j++)
+		x[i][j]=0;
+    }
+
+    Matrix operator * (const Matrix &a) 
+    {
+	Matrix res;
+	for(int i=0;i<=cnt;i++)
+	    for(int j=0;j<=cnt;j++)
+		for(int k=0;k<=cnt;k++)
+		    res.x[i][j]=(res.x[i][j]+x[i][k]*a.x[k][j])%P;
+	return res;
+    }
+}m;
+
+struct AC
+{
+    int son[MAXN][4],fail[MAXN],end[MAXN];
+    int now,tmp,len;
+
+    void insert(char ch[])
+    {
+	now=0;
+	len=strlen(ch);
+	for(int i=0;i<len;i++)
+	{
+	    tmp=id[ch[i]];
+	    if(!son[now][tmp]) son[now][tmp]=++cnt;
+	    now=son[now][tmp];
+	}
+	end[now]=1;
+    }
+
+    void get_fail()
+    {
+	int h=0,t=0;
+	for(int i=0;i<4;i++)
+	    if(son[0][i]) q[++t]=son[0][i];
+	while(h<t)
+	{
+	    now=q[++h];
+	    int f=fail[now];
+	    if(end[f]) end[now]=1;
+	    for(int i=0;i<4;i++)
+		if(son[now][i])
+		{
+		    fail[son[now][i]]=son[f][i];
+		    q[++t]=son[now][i];
+		}
+		else son[now][i]=son[f][i];
+	}
+    }
+
+    Matrix build()
+    {
+	Matrix res;
+    	for(int i=0;i<=cnt;i++) if(!end[i])
+	    for(int j=0;j<4;j++) if(!end[son[i][j]])
+		res.x[i][son[i][j]]++,res.x[i][son[i][j]]%=P;
+	return res;
+	//这里建立的矩阵是从i一步到j的种数
+    }
+}ac;
+
+//因为如果长度为3的话，考虑起始为i，结束为j
+//将k设为中间的那个，那么就有dp[i][j]=(k=0~cnt)dp[i][k]*dp[k][j]种
+//其实就是矩阵ANS=A*A;
+//因为最终要的长度为n，考虑用矩阵加速幂
+Matrix qpow(Matrix a,ll tim)
+{
+    Matrix ans;
+    for(int i=0;i<=cnt;i++) ans.x[i][i]=1;//从0开始，要加上这一步
+    for(;tim;tim>>=1,a=a*a)
+	if(tim&1) ans=ans*a;
+    return ans;
+}
+
+int main()
+{
+    scanf("%d%lld",&M,&N);
+    id['A']=0,id['C']=1,id['G']=2,id['T']=3;
+    char a[15];
+    for(int i=1;i<=M;i++)
+	scanf("%s",a),ac.insert(a);
+    ac.get_fail();
+    m=ac.build();
+    Matrix res=qpow(m,N);
+    ll ans=0;
+    for(int i=0;i<=cnt;i++)
+	ans=(ans+res.x[0][i])%P;//从0到任意一个作为结尾的长度为n的都要算上
+    printf("%lld",ans);
+}

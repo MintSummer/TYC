@@ -1,0 +1,123 @@
+#include <cmath>
+#include <cstdio>
+#include <cstring>
+#include <iostream>
+#include <algorithm>
+#define N 13000
+#define LN 35
+#define SN 115
+#define T 31
+#define ls son[x][0]
+#define rs son[x][1]
+using namespace std;
+
+int n,m,sum[N];
+
+int blocks,size,belong[N];
+int from[N],to[N];
+
+struct Functional_Trie
+{
+    int root[N],cnt;
+    int son[N*LN][2],size[N*LN];
+
+    bool a[LN];
+    void add(int w,int id)
+    {
+        root[id]=++cnt,size[cnt]=1;
+        int i,x=root[id],y=root[id-1];
+        root[id]=x;
+        for(i=0;i<=T;i++)a[i]=((w>>i)&1);
+        for(i=T;i>=0;i--)
+        {
+            if(a[i])
+            {
+                ls=son[y][0],rs=++cnt;
+                size[cnt]=size[son[y][1]]+1;
+                x=rs,y=son[y][1];
+            }
+            else {
+                rs=son[y][1],ls=++cnt;
+                size[cnt]=size[son[y][0]]+1;
+                x=ls,y=son[y][0];
+            }
+        }
+    }
+    int query(int last,int now,int w)
+    {
+        int i,x=root[now],y=root[last-1];
+        for(i=0;i<=T;i++)a[i]=((w>>i)&1);
+        int ans=0;
+        for(i=T;i>=0;i--)
+        {
+            if(a[i])
+            {
+                if(size[ls]-size[son[y][0]])
+                    x=ls,y=son[y][0],ans+=(1<<i);
+                else x=rs,y=son[y][1];
+            }
+            else {
+                if(size[rs]-size[son[y][1]])
+                    x=rs,y=son[y][1],ans+=(1<<i);
+                else x=ls,y=son[y][0];
+            }
+        }
+        return ans;
+    }
+}trie;
+int ans[SN][N];
+int main()
+{
+    int i,j,k;
+    int a,b,c;
+
+    scanf("%d%d",&n,&m),n++;
+    trie.add(0,1);
+    for(i=2;i<=n;i++)
+    {
+        scanf("%d",&sum[i]);
+        sum[i]^=sum[i-1];
+        trie.add(sum[i],i);
+    }
+    size=sqrt(n);
+    for(i=1;i<=n;i+=size)
+    {
+        from[++blocks]=i;
+        for(j=0;j<size&&(i+j<=n);j++)
+            belong[i+j]=blocks;
+        to[blocks]=i+j-1;
+    }
+    for(i=1;i<=n;i++)
+    {
+        int k=belong[i];if(i==from[k])k--;
+        for(j=1;j<=k;j++)
+        {
+            ans[j][i]=trie.query(from[j],i-1,sum[i]);
+            ans[j][i]=max(ans[j][i],ans[j][i-1]);
+        }
+    }
+    int l,r,lastans=0;
+    while(m--)
+    {
+        scanf("%d%d",&a,&b);
+        l=((long long)a+lastans)%(n-1)+1;
+        r=((long long)b+lastans)%(n-1)+1;
+        if(l>r)swap(l,r);r++;
+
+        lastans=0,k=belong[l];
+        if(l==from[k])lastans=ans[k][r];
+        else if(k==belong[r])
+        {
+            for(i=l;i<r;i++)for(j=i+1;j<=r;j++)
+                lastans=max(lastans,sum[i]^sum[j]);
+        }
+        else {
+            k++;
+            lastans=ans[k][r];
+            for(i=l;i<min(from[k],r);i++)
+                lastans=max(lastans,trie.query(i+1,r,sum[i]));
+        }
+        printf("%d\n",lastans);
+    }
+    return 0;
+}

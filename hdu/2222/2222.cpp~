@@ -1,0 +1,79 @@
+#include<bits/stdc++.h>
+using namespace std;
+const int MAXN=50*10000+10;
+int T,n,cnt;
+char a[55],b[1000010];
+queue<int> q;
+
+struct AC
+{
+    int son[MAXN][26],fail[MAXN],end[MAXN];
+    int len,now,tmp,x;
+
+    void clear()
+    {
+	cnt=0;
+	memset(son,0,sizeof(son));
+	memset(fail,0,sizeof(fail));
+	memset(end,0,sizeof(end));
+    }
+
+    void insert(char ch[])
+    {
+	len=strlen(ch),now=0;
+	for(int i=0;i<len;i++)
+	{
+	    tmp=ch[i]-'a';
+	    if(!son[now][tmp]) son[now][tmp]=++cnt;
+	    now=son[now][tmp];
+	}
+	end[now]++;
+    }
+
+    void get_fail()
+    {
+	for(int i=0;i<26;i++)
+	    if(son[0][i]) q.push(son[0][i]);
+	while(!q.empty())
+	{
+	    now=q.front();q.pop();
+	    int f=fail[now];
+	    for(int i=0;i<26;i++)
+		if(son[now][i])
+		{
+		    int x=son[now][i];
+		    fail[x]=son[f][i];
+    		    q.push(x);
+		}
+		else son[now][i]=son[f][i];
+    	}
+    }
+
+    int search(char ch[])
+    {
+	int ans=0;
+	len=strlen(ch),now=0;
+	for(int i=0;i<len;i++)
+	{
+	    now=son[now][ch[i]-'a'];
+	    for(int j=now;j;j=fail[j])
+		ans+=end[j];
+	}
+	return ans;
+    }
+}ac;
+
+int main()
+{
+    scanf("%d",&T);
+    while(T--)
+    {
+	ac.clear();
+	scanf("%d",&n);
+	for(int i=1;i<=n;i++)
+	    scanf("%s",a),ac.insert(a);
+	ac.get_fail();
+	scanf("%s",b);
+	printf("%d",ac.search(b));
+    }
+}

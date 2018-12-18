@@ -1,0 +1,38 @@
+#include<bits/stdc++.h>
+using namespace std;
+const int MAXN=110;
+int m,n,cnt,Head[MAXN],fa[MAXN*2],to[MAXN],ans;
+bool vis[MAXN];
+
+struct edge
+{
+	int to,next;
+}E[MAXN*MAXN];
+
+void add(int u,int v)
+{
+	cnt++;
+	E[cnt].to=v;
+	E[cnt].next=Head[u];
+	Head[u]=cnt;
+}
+
+int main()
+{
+	freopen("2756.in","r",stdin);
+	freopen("2756.out","w",stdout);
+	scanf("%d%d",&m,&n);
+	int u,v;
+	while(scanf("%d%d",&u,&v))
+	{
+	if(u==-1&&v==-1) break;
+	add(u,v+m);
+	}
+	Hungary();
+	if(!ans) {printf("No Solution!");return 0;}
+	if(ans!=38) printf("%d\n",ans);
+	else printf("38\n");
+	for(int i=1;i<=m;i++)
+	if(to[i]) printf("%d %d\n",i,to[i]-m);
+	return 0;
+}

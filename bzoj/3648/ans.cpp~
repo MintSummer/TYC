@@ -1,0 +1,162 @@
+#include<iostream>
+#include<cstdio>
+#include<cstring>
+#include<cstdlib>
+#include<set>
+#include<ctime>
+#include<vector>
+#include<queue>
+#include<algorithm>
+#define ll long long 
+using namespace std;
+int read()
+{
+    int x=0,f=1;char ch=getchar();
+    while(ch<'0'||ch>'9'){if(ch=='-')f=-1;ch=getchar();}
+    while(ch>='0'&&ch<='9'){x=x*10+ch-'0';ch=getchar();}
+    return x*f;
+}
+ll ans;
+int n,m,K,cnt,C;
+int rt,sum,tot,top,delta;
+int last[100005];
+int f[100005],size[100005],dis[100005];
+int q[100005],t[300005],cir[200005];
+bool inq[100005],vis[100005];
+struct edge{
+	int to,next;
+	}e[200005];
+void insert(int u,int v)
+{
+	e[++cnt].to=v;e[cnt].next=last[u];last[u]=cnt;
+	e[++cnt].to=u;e[cnt].next=last[v];last[v]=cnt;
+}
+int query(int x)
+{
+	if(x<1)return 0;
+	int tmp=0;
+	for(int i=x;i;i-=i&-i)tmp+=t[i];
+	return tmp;
+}
+void add(int x,int val)
+{
+	tot+=val;
+	for(int i=x;i<=2*C+n;i+=i&-i)t[i]+=val;
+}
+void getrt(int x,int fa)
+{
+	f[x]=0;size[x]=1;
+	for(int i=last[x];i;i=e[i].next)
+		if(e[i].to!=fa&&!vis[e[i].to])
+		{
+			getrt(e[i].to,x);
+			size[x]+=size[e[i].to];
+			f[x]=max(f[x],size[e[i].to]);
+		}
+	f[x]=max(f[x],sum-size[x]);
+	if(f[x]<f[rt])rt=x;
+}
+void dfs(int x,int fa)
+{
+    q[++top]=dis[x];
+	for(int i=last[x];i;i=e[i].next)
+		if(!vis[e[i].to]&&e[i].to!=fa)
+		{
+			dis[e[i].to]=dis[x]+1;
+			dfs(e[i].to,x);
+		}
+}
+void solve(int x)
+{
+	vis[x]=1;
+	for(int i=last[x];i;i=e[i].next)
+		if(!vis[e[i].to])
+		{
+			dis[e[i].to]=1;
+			dfs(e[i].to,x);
+			for(int j=1;j<=top;j++)
+			{
+				if(q[j]+1>=K)ans++;
+				ans+=tot-query(K-q[j]-2);
+			}
+		    while(top)add(q[top--],1);
+		}
+	for(int i=last[x];i;i=e[i].next)
+		if(!vis[e[i].to])
+	    {
+			dfs(e[i].to,x);
+		    while(top)add(q[top--],-1);
+		}
+	for(int i=last[x];i;i=e[i].next)
+		if(!vis[e[i].to])
+		{
+			if(size[e[i].to]<K)continue;
+			rt=0;sum=size[e[i].to];
+			getrt(e[i].to,x);
+			solve(rt);
+		}
+}
+void div(int x)
+{
+	sum=n;f[0]=n+1;rt=0;
+	getrt(x,0);
+	solve(rt);
+}
+void getc(int x,int fa)
+{
+	if(cir[0])return;
+	q[++top]=x;inq[x]=1;
+	for(int i=last[x];i;i=e[i].next)
+		if(e[i].to!=fa)
+		{
+			if(inq[e[i].to])
+			{
+				while(q[top]!=e[i].to)cir[++cir[0]]=q[top--];
+				cir[++cir[0]]=e[i].to;
+			}
+			else getc(e[i].to,x);
+		}
+	top--;inq[x]=0;
+}
+void solvecir()
+{
+	getc(1,0);top=0;
+	C=cir[0];delta=2*C;
+	for(int i=1;i<=C;i++)cir[i+C]=cir[i];
+	for(int i=1;i<=C;i++)vis[cir[i]]=1;
+	for(int i=1;i<=C;i++)
+	{
+		vis[cir[i]]=0;
+		div(cir[i]);
+		vis[cir[i]]=1;
+	}
+	for(int i=1;i<=n;i++)vis[i]=0;
+	for(int i=1;i<=C;i++)vis[cir[i]]=1;
+	for(int i=1;i<=2*C;i++)
+	{
+		if(i>C)
+		{
+			vis[cir[i-C]]=0;dfs(cir[i-C],0);vis[cir[i-C]]=1;
+			for(int j=1;j<=top;j++)add(q[j]+delta+C,-1);
+			for(int j=1;j<=top;j++)
+				ans+=tot-query(K+delta-q[j]);
+			top=0;
+		}
+		dis[cir[i]]=1;
+		vis[cir[i]]=0;dfs(cir[i],0);vis[cir[i]]=1;
+		while(top)add(q[top--]+delta,1);delta--;
+	}
+}
+int main()
+{
+	n=read();m=read();K=read();
+	for(int i=1;i<=m;i++)
+	{
+		int u=read(),v=read();
+		insert(u,v);
+	}
+	if(n==m)solvecir();
+	else div(1);
+	printf("%lld\n",ans);
+	return 0;
+}
