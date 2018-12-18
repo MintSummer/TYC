@@ -1,15 +1,15 @@
-// luogu-judger-enable-o2
 #include<bits/stdc++.h>
 using namespace std;
 
 namespace TYC
 {
     typedef pair<int,int> pa;
-    const int K=12;
-    const int N=510;
+    const int K=10;
+    const int N=505;
     const int MX=500*500;
-    const int M=500*500+10;
-    const int inf=0x3f3f3f3f;
+    //const int M=500*500+5;
+    const int M=2e5+5;
+	const int inf=0x3f3f3f3f;
     const int dx[]={-1,0,1,0};
     const int dy[]={0,-1,0,1};
 

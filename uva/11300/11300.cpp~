@@ -1,9 +1,0 @@
-#include<cstdio>
-#include<algorithm>
-using namespace std;
-
-const int maxn=1000000+10;
-long long A[maxn],C[maxn],tot,M;
-int main(){
-	int n;
-	
